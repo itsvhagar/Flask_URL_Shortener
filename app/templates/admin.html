@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="{{ url_for('static', filename='admin.js') }}"></script>
+  <title>Admin Page</title>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <h1>URL Shortener</h1>
+    <!-- Dummy anchor to maintain consistency in navbar -->
+    <a href="/" class="signin-btn">Log out</a>
+  </div>
+
+  <!-- Content -->
+  <div class="customer-content">
+    <div class="menu">
+      <div class="buttonlist">
+        <div class="create-menu-container">
+          <div class="orb-overflow-menu">
+            <div class="icon">
+              <div tabindex="0" class="orb-tooltip right">
+                <div class="anchor">
+                  <div class="buttonlist">
+                    <button id = "btnManageUser">
+                      <span>Manage Users</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="orb-divider">
+        <div tabindex="0" class="orb-tooltip right">
+          <div class="anchor">
+            <div class="buttonlist">
+              <button id = "btnSettings">
+                <span>Account Settings</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="menu-frame">
+      <div id="manageUsers" style="display:block; margin:20px;">
+        <h2 style="text-align:center; color:#333; font-size:24px; margin-bottom:20px;">Manage Users</h2>
+        
+        <!-- User List Table -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+          <thead>
+            <tr style="background-color:#f4f4f4; color:#333;">
+              <th style="padding:10px; border-bottom:1px solid #ddd;"><input type="checkbox" id="selectAllUsers" onclick="selectAll(this)"></th>
+              <th style="padding:10px; border-bottom:1px solid #ddd;">User ID</th>
+              <th style="padding:10px; border-bottom:1px solid #ddd;">Username</th>
+              <th style="padding:10px; border-bottom:1px solid #ddd;">Password</th>
+              <th style="padding:10px; border-bottom:1px solid #ddd;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="userList">
+            <!-- Example User Row -->
+            {% for user in users %}
+            <tr style="border-bottom:1px solid #ddd;">
+              <td style="padding:10px; text-align:center;"><input type="checkbox" class="userCheckbox" value="{{ user.id }}"></td>
+              <td style="padding:10px; text-align:center;">{{ user.id }}</td>
+              <td style="padding:10px; text-align:center;">{{ user.username }}</td>
+              <td style="padding:10px; text-align:center;">{{ user.password }}</td> <!-- Assuming you have an email field -->
+              <td style="padding:10px; text-align:center;">
+                <button class="viewLinksButton" data-userid ="{{ user.id }}" style="padding:5px 10px; margin-right:5px; background-color:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;" onClick="viewLinks('{{ user.id }}')">View Links</button>
+                <button class="deleteUserButton" data-userid="{{ user.id }}" style="padding:5px 10px; background-color:#f44336; color:white; border:none; border-radius:4px; cursor:pointer;" onClick="deleteUser('{{ user.id }}', this.closest('tr'));">Delete</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        
+        <button id="deleteSelectedUsers" style="padding:10px 20px; background-color:#008CBA; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="deleteSelectedUsers()">Delete Selected Users</button>
+        
+      </div>
+
+      <!-- The modal -->
+      <div id="myModal" class="modal" style="display:none;">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <h2>Links</h2>
+          <table style="width:100%; border-collapse:collapse; margin-bottom:20px; table-layout: fixed;">
+            <thead>
+              <tr style="background-color:#f4f4f4; color:#333;">
+                <th style="padding:10px; border-bottom:1px solid #ddd;"><input type="checkbox" id="selectAllUsers" onclick="selectAll(this)"></th>
+                <th style="padding:10px; border-bottom:1px solid #ddd;">Link ID</th>
+                <th style="padding:10px; border-bottom:1px solid #ddd;">URL</th>
+                <th style="padding:10px; border-bottom:1px solid #ddd; word-wrap: break-word;">Destination</th>
+                <th style="padding:10px; border-bottom:1px solid #ddd;">Open</th>
+                <th style="padding:10px; border-bottom:1px solid #ddd;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="linkListPopup">
+              <!-- Table rows will be populated here -->
+            </tbody>
+          </table>
+          <button id="deleteSelectedLinks" style="padding:10px 20px; background-color:#008CBA; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="deleteSelectedLinks()">Delete Selected Links</button>
+        </div>
+      </div>
+
+      
+      <div id="accountContent" style="display:none; margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 4px;">
+        <h2 style="text-align:center; color:#333; font-size:24px; margin-bottom:20px;">Account Settings</h2>
+      
+        <form id="changePasswordForm" style="max-width: 300px; margin: auto;">
+          <input type="hidden" id="userID" name="userID" value="{{ user_id }}">
+      
+          <div style="margin-bottom: 15px;">
+            <label for="oldPassword" style="display: block; margin-bottom: 5px;">Old Password</label>
+            <input type="password" id="oldPassword" name="oldPassword" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+      
+          <div style="margin-bottom: 15px;">
+            <label for="newPassword" style="display: block; margin-bottom: 5px;">New Password</label>
+            <input type="password" id="newPassword" name="newPassword" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+      
+          <div style="margin-bottom: 15px;">
+            <label for="confirmPassword" style="display: block; margin-bottom: 5px;">Confirm New Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+      
+          <div style="text-align:center;">
+            <button type="submit" style="padding: 10px 20px; background-color:#008CBA; color:white; border:none; border-radius:4px; cursor:pointer;">Change Password</button>
+          </div>
+          <p class="password-error" style="color: #ff4d4f;margin-top: 15px; text-align:center;"></p>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</body>
+</html>
