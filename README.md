@@ -1,5 +1,11 @@
 # Flask_URL_Shortener
-1. Install dependencies
+
+A microservice of URL Shortener made by Vhagar
+
+# Installation
+- Install dependencies
     pip install -r requirements.txt
-2. Run application
+- Run application
     python application.py --port=8000
+
+# Buy me a coffee: https://buymeacoffee.com/itsvhagar
